@@ -18,7 +18,7 @@
         //funciones o metodos. son sinonimos si la funcion esta dentro de una clase 
         //los objetos deben estar en un estado inicial. creamos un constructor. antes tenia  el mismo nombre de la clase. hoy se llama __construct()
         //metodo constructor y se encarga de darle un estado inicial al objeto
-        //el metodo constructor puede recibir parametros
+        //el metodo ctor puede recibir parametros
 
         function  __construct(){   //metodo constructor 
 
