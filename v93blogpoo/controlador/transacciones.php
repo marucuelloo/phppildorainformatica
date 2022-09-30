@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,18 +8,19 @@
     <title>Document</title>
 </head>
 <body>
-    
     <?php
-    //paso4
-//conexion a la bd
-$conexion=mysqli_connect("localhost", "root", "", "blog");
+    
+//se encarga de gestionar las acciones entre el formulario de vista y los 2 arhivos de modelo 
+//debe recoger la info del formulario e interactuando con manejo objeto debe ser capaz de introducir la inf en la bd 
 
-//comprobar conexion
-if(!$conexion){
-    echo "La conexion ha fallado: " . mysqli_error();
-    exit();
-}
-//paso5
+include_once("..\modelo\objetoblog.php");
+include_once("..\modelo\manejoobj.php");
+
+try{
+    $conexion=new PDO('mysql:host=localhost; dbname=blog', 'root', '');
+    $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+     
 //evaluar si la subida de imagen da error 
 //imagen se llama name=imagen
 if($_FILES['imagen']['error']){
@@ -46,7 +48,7 @@ if($_FILES['imagen']['error']){
     //es decir, si esta todo bien: 
     if((isset($_FILES['imagen']['name'])&&($_FILES['imagen']['error']==UPLOAD_ERR_OK))){
              //paso6
-        $destinoderuta="img/";
+        $destinoderuta="../img/";
         //movemos del direcotorio temporal al directorio que querramos, en este caso la carpeta img 
         move_uploaded_file($_FILES['imagen']['tmp_name'], $destinoderuta . $_FILES['imagen']['name']);
         //mensaje si la imagen se guarda correctamente 
@@ -58,35 +60,53 @@ if($_FILES['imagen']['error']){
 
 }
 
+//el siguiente paso es rescatar la inf que el usuario ha ido introducienod en el formulario y con esa inf construir un objeto del tipo blog 
+//creo una var instancia manejooob  y llamo a la conexion
+$manejoobj= new Manejoobjetos($conexion);
+//ahora creamos un objeto del tipo $blog para acceder a sus prop
+$blog= new Objetoblog();
+$blog->settitulo(htmlentities(addslashes($_POST["campo_titulo"]), ENT_QUOTES));
+$blog->setfecha(Date("Y-m-d H:i:s"));
+$blog->setcomentario(htmlentities(addslashes($_POST["area_comentarios"]), ENT_QUOTES));
+$blog->setimagen($_FILES['imagen']['name']);
+
+//con ese objeto pdoemos insertar esa inf en la bd 
+$manejoobj->insertacontenido($blog);
+echo "<br> Entrada de blog creada con exito <br>";
+
+//nos falta rescatar las entradas de blog para ver en una web 
 
 
-//paso 7 intruccion sql insert into 
-//en el values incluis lo que viene del formulario 
 
-$eltitulo=$_POST['campo_titulo'];
-//el campo fecha no esta en el formulario(entonces no podemos ir a buscar el nombre del campo), pero si en la base de datos
-//queremos que en el camppo fecha se inserte el dia de hoy. esto lo rescatamos con la funcion date y podemos darle el formato que querramos 
-date_default_timezone_set('America/Argentina/Buenos_Aires'); //tome la hora local
-$lafecha = date("Y-m-d H:i:s");
-$elcomentario=$_POST['area_comentarios'];
 
-//ver como subir imagen al servidor si hay dudas
-$laimagen=$_FILES['imagen']['name'];
-//ahora GUARDA CON LA CONCATENACION 
-$consulta= "INSERT INTO CONTENIDO(titulo, fecha, comentario, imagen) VALUES ('" . $eltitulo . "', '". $lafecha . "', '" . $elcomentario . "', 'i" . $laimagen . "')";
-//ejecutar la instruccion sql 
 
-$resultado=mysqli_query($conexion, $consulta);
 
-//cerramos conexion
-mysqli_close($conexion);
 
-echo "<br> Se ha registrado el comentario con exito <br> <br> "; 
+
+
+}catch(Exception $e){
+         //die que mate cualqueir proceso 
+         die("Error: " . $e->getMessage());
+    echo "la linea del error es: " . $e->getLine();
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ?>
-
-<a href="Formulario.php"> Quieres introducir otro comentario? <br> </a>
-<a href="mostrarblog.php"> Ver Blog <br> </a>
+    
 </body>
 </html>
+

@@ -32,8 +32,6 @@ while($fila=mysqli_fetch_array($resultado)){
 
 <div>
     <img src="/img/<?php echo $rutaimg; ?>" alt="imagen del primer articulo" widt="50%"/>
-
-
 </div>
 </body>
 </html>
